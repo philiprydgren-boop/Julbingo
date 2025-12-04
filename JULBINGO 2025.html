@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Randstads Julbingo</title>
+    <style>
+        /* --- SNÖFLINGA OCH BAKGRUNDSDEKORATIONER --- */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            
+            /* JULTEMA BAKGRUND */
+            background-image: linear-gradient(to bottom, #bbdefb 0%, #ffffff 100%);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Snöeffekt (CSS Animation) */
+        .snowflake {
+            color: #fff;
+            font-size: 1em;
+            font-family: Arial, sans-serif;
+            text-shadow: 0 0 1px #000;
+            position: fixed;
+            top: -10%;
+            z-index: 0;
+            user-select: none;
+            pointer-events: none;
+            animation-name: fall;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(105vh);
+            }
+        }
+        
+        /* Dekorationer: Gran och Paket */
+        .decor-left {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            font-size: 80px;
+            z-index: 1;
+            line-height: 1;
+        }
+        
+        .decor-right {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 80px;
+            z-index: 1;
+            line-height: 1;
+        }
+        
+        /* --- RUBRIKER & LAYOUT --- */
+
+        .welcome-header {
+            text-align: center;
+            margin-bottom: 30px;
+            z-index: 5;
+        }
+        
+        .welcome-header h1 {
+            color: #c0392b; 
+            font-size: 36px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .welcome-header h2 {
+            color: #27ae60; 
+            font-size: 24px;
+            margin-top: -10px;
+        }
+
+
+        /* --- Formulär & Info Stil --- */
+        .registration-form {
+            z-index: 5;
+            position: relative;
+        }
+        
+        .registration-form, .team-info {
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 450px;
+            margin-bottom: 20px;
+        }
+        
+        .team-info {
+            border: 2px dashed #f1c40f;
+            background-color: #fcf8e3;
+        }
+        
+        /* --- BINGOBRICKAN OCH SCOREBOARD CONTAINERN --- */
+        .bingo-game-container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start; /* Placera dem i toppen */
+            z-index: 5;
+            position: relative;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .bingo-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .bingo-grid {
+            /* 5 kolumner för nummer + 1 kolumn för poäng */
+            display: grid;
+            grid-template-columns: repeat(5, 80px) 40px; 
+            grid-template-rows: repeat(5, 80px);
+            border: 5px solid #27ae60;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            background-color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+            border: 1px solid #bdc3c7;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            user-select: none;
+        }
+        
+        .points-indicator {
+            background-color: #f7f7f7;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            border-left: 2px dashed #ccc;
+        }
+
+        .row-bingo + .points-indicator {
+            background-color: #f1c40f; /* Gul bakgrund när raden är klar */
+            color: black;
+        }
+
+
+        .marked {
+            background-color: #e74c3c !important; 
+            color: white;
+            position: relative;
+        }
+
+        .row-bingo {
+            background-color: #2ecc71 !important; 
+            color: white;
+            animation: flash-green 1s ease-in-out;
+        }
+
+        .bingo-message {
+            margin-top: 20px;
+            font-size: 24px;
+            color: #c0392b;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        /* --- SCOREBOARD STYLING --- */
+        .scoreboard {
+            background-color: #fff;
+            border: 4px solid #c0392b;
+            border-radius: 8px;
+            padding: 20px;
+            width: 250px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .scoreboard h3 {
+            color: #c0392b;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        .total-score {
+            font-size: 40px;
+            color: #2ecc71;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        /* --- Knappar och Länkar --- */
+        .hidden {
+            display: none !important;
+        }
+
+        .submit-link {
+            background-color: #f1c40f;
+            color: #333;
+            width: 90%; 
+            padding: 15px 20px;
+            font-size: 18px;
+            border: 2px solid #f39c12;
+        }
+        
+        .continue-btn {
+            background-color: #3498db;
+            color: white;
+            margin-top: 15px;
+            width: 100%;
+        }
+        
+        .start-new-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        /* Popup (Modal) Stil */
+        .modal { 
+            z-index: 10;
+            display: none; 
+        }
+        .warning-text { color: #c0392b; }
+        .gmail-link-in-modal { background-color: #f1c40f; }
+        
+        /* Media Query för små skärmar */
+        @media (max-width: 850px) {
+            .bingo-game-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .scoreboard {
+                width: 100%;
+                max-width: 450px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    
+    <div class="decor-left">
+        <span role="img" aria-label="Gran">🌲</span>
+    </div>
+    <div class="decor-right">
+        <span role="img" aria-label="Paket">🎁</span>
+        <span role="img" aria-label="Gran">🎄</span>
+    </div>
+    <div id="snowflakes"></div>
+
+    <div class="welcome-header">
+        <h1>Välkommen till Randstads fantastiska julbingo!</h1>
+        <h2>🎅 Julbingo (1-25) 🎁</h2>
+    </div>
+
+    <div class="registration-form" id="registrationForm">
+        <h2>Registrera Lag</h2>
+        <p id="savedDataMessage" class="hidden" style="color:#3498db; font-weight:bold;">Vi hittade sparad data! Klicka på "Fortsätt spela" för att ladda din bricka.</p>
+        
+        <div class="input-group">
+            <label for="teamName">Lagnamn <span class="required-indicator">* (Obligatoriskt)</span></label>
+            <input type="text" id="teamName" required oninput="saveData()">
+        </div>
+
+        <h3>Deltagare (max 3)</h3>
+        <div class="input-group">
+            <label for="p1-fn">Person 1:</label>
+            <input type="text" id="p1-fn" placeholder="Förnamn" oninput="saveData()">
+            <input type="text" id="p1-en" placeholder="Efternamn" oninput="saveData()">
+        </div>
+        <div class="input-group">
+            <label for="p2-fn">Person 2:</label>
+            <input type="text" id="p2-fn" placeholder="Förnamn" oninput="saveData()">
+            <input type="text" id="p2-en" placeholder="Efternamn" oninput="saveData()">
+        </div>
+        <div class="input-group">
+            <label for="p3-fn">Person 3:</label>
+            <input type="text" id="p3-fn" placeholder="Förnamn" oninput="saveData()">
+            <input type="text" id="p3-en" placeholder="Efternamn" oninput="saveData()">
+        </div>
+
+        <button id="startGame">Starta Spelet</button>
+        <button id="continueGame" class="continue-btn hidden">Fortsätt Spela</button>
+    </div>
+
+    <div class="team-info hidden" id="teamInfoDisplay">
+        <p><strong>Lag:</strong> <span id="displayTeamName"></span></p>
+        <p><strong>Deltagare:</strong></p>
+        <ul id="displayParticipants"></ul>
+    </div>
+
+    <div class="bingo-game-container hidden" id="bingoGameContainer">
+        
+        <div class="bingo-area">
+             <div class="bingo-grid" id="bingoGrid">
+                </div>
+            <div class="button-group">
+                 <a href="#" class="submit-link" id="submitBingoLink">Skicka in Julbricka (via Gmail)</a>
+            </div>
+        </div>
+        
+        <div class="scoreboard">
+            <h3>SCOREBOARD</h3>
+            <p>Lag: <span id="scoreboardTeamName" style="font-weight:bold;"></span></p>
+            <p>Total Poäng:</p>
+            <div class="total-score" id="totalScore">0</div>
+        </div>
+
+    </div>
+    
+    <div class="bingo-message hidden" id="message"></div>
+    
+    <div id="godJulModal" class="modal">
+      <div class="modal-content">
+        <h2>🎉 Grattis!</h2>
+        <p class="warning-text">Glöm inte att skicka in brickan manuellt via länken!</p>
+        <div class="god-jul-image">
+            GOD JUL! 🎄
+        </div>
+        <p>Använd länken nedan om Gmail-fönstret inte öppnades:</p>
+        <a href="#" class="gmail-link-in-modal" id="modalGmailLink" target="_blank">Skicka till Gmail</a>
+      </div>
+    </div>
+
+    <script>
+        // --- SNÖFLINGEGENERERING ---
+        function createSnowflakes() {
+            const snowContainer = document.getElementById('snowflakes');
+            const numSnowflakes = 50;
+            const symbols = ['❅', '❆', '❄️', '✶'];
+
+            for (let i = 0; i < numSnowflakes; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.classList.add('snowflake');
+                snowflake.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                
+                const size = Math.random() * 1.5 + 0.5;
+                snowflake.style.fontSize = size + 'em';
+                snowflake.style.left = Math.random() * 100 + 'vw';
+                snowflake.style.animationDuration = Math.random() * 10 + 5 + 's';
+                snowflake.style.animationDelay = Math.random() * 10 + 's';
+                
+                snowContainer.appendChild(snowflake);
+            }
+        }
+        createSnowflakes();
+        // --- SLUT PÅ SNÖFLINGEGENERERING ---
+
+
+        const GRID_SIZE = 5;
+        const STORAGE_KEY = 'randstadBingoSave';
+        const ROW_POINTS = [5, 10, 15, 20, 25]; 
+
+        const form = document.getElementById('registrationForm');
+        const startGameButton = document.getElementById('startGame');
+        const continueGameButton = document.getElementById('continueGame');
+        const submitBingoLink = document.getElementById('submitBingoLink');
+        const teamNameInput = document.getElementById('teamName');
+        const savedDataMessage = document.getElementById('savedDataMessage');
+
+        const grid = document.getElementById('bingoGrid');
+        const message = document.getElementById('message');
+        const teamInfoDisplay = document.getElementById('teamInfoDisplay');
+        const displayTeamName = document.getElementById('displayTeamName');
+        const displayParticipants = document.getElementById('displayParticipants');
+        const bingoGameContainer = document.getElementById('bingoGameContainer'); 
+        const godJulModal = document.getElementById('godJulModal');
+        const modalGmailLink = document.getElementById('modalGmailLink');
+        const totalScoreDisplay = document.getElementById('totalScore');
+        const scoreboardTeamNameDisplay = document.getElementById('scoreboardTeamName');
+        
+        let cells = [];
+        let finalGmailLink = '';
+
+        // --- Dataspare- och Laddningslogik (LocalStorage) ---
+
+        function saveData() {
+            if (cells.length === 0) return; 
+            
+            const bingoCells = cells.filter(c => !c.classList.contains('points-indicator'));
+            const markedStates = bingoCells.map(cell => cell.classList.contains('marked'));
+            
+            const data = {
+                teamName: teamNameInput.value.trim(),
+                p1fn: document.getElementById('p1-fn').value.trim(),
+                p1en: document.getElementById('p1-en').value.trim(),
+                p2fn: document.getElementById('p2-fn').value.trim(),
+                p2en: document.getElementById('p2-en').value.trim(),
+                p3fn: document.getElementById('p3-fn').value.trim(),
+                p3en: document.getElementById('p3-en').value.trim(),
+                markedCells: markedStates
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        function loadData() {
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            if (!savedData) return false;
+
+            const data = JSON.parse(savedData);
+
+            teamNameInput.value = data.teamName || '';
+            document.getElementById('p1-fn').value = data.p1fn || '';
+            document.getElementById('p1-en').value = data.p1en || '';
+            document.getElementById('p2-fn').value = data.p2fn || '';
+            document.getElementById('p2-en').value = data.p2en || '';
+            document.getElementById('p3-fn').value = data.p3fn || '';
+            document.getElementById('p3-en').value = data.p3en || '';
+            
+            // Markera rutorna om de finns
+            const bingoCells = cells.filter(c => !c.classList.contains('points-indicator'));
+            if (data.markedCells && data.markedCells.length === bingoCells.length) {
+                
+                data.markedCells.forEach((isMarked, index) => {
+                    if (isMarked) {
+                        bingoCells[index].classList.add('marked');
+                    } else {
+                        bingoCells[index].classList.remove('marked');
+                    }
+                });
+                checkBingo(false); 
+            }
+            return true;
+        }
+        
+        // --- Spelstartslogik ---
+        
+        function startGame(loadSaved = false) {
+            
+            // Hantera validering av lagnamn
+            if (teamNameInput.value.trim() === "") {
+                alert("Lagnamnet är obligatoriskt! Vänligen fyll i ett lagnamn.");
+                teamNameInput.focus();
+                return;
+            }
+
+            // Dölj formuläret och visa spelet
+            form.classList.add('hidden');
+            bingoGameContainer.classList.remove('hidden');
+            message.classList.remove('hidden');
+            teamInfoDisplay.classList.remove('hidden');
+            
+            if (!loadSaved) {
+                // Notera: Brickan rensas redan i initieringssteget för "Börja Nytt Spel"
+                // om vi kommer hit utan loadSaved, ska vi spara det nya, rena tillståndet.
+            }
+
+            // Hämta och visa laginformation (och uppdatera scoreboard)
+            const teamName = teamNameInput.value.trim();
+            displayTeamName.textContent = teamName;
+            scoreboardTeamNameDisplay.textContent = teamName;
+            displayParticipants.innerHTML = '';
+
+            for (let i = 1; i <= 3; i++) {
+                const fn = document.getElementById(`p${i}-fn`).value.trim();
+                const en = document.getElementById(`p${i}-en`).value.trim();
+
+                if (fn || en) {
+                    const fullName = (fn + ' ' + en).trim();
+                    const li = document.createElement('li');
+                    li.textContent = fullName || `Person ${i} (Namn saknas)`;
+                    displayParticipants.appendChild(li);
+                }
+            }
+
+            if (displayParticipants.children.length === 0) {
+                 const li = document.createElement('li');
+                 li.textContent = "Inga deltagare registrerade";
+                 displayParticipants.appendChild(li);
+            }
+            
+            // Kontrollera poäng/status och spara det aktuella tillståndet
+            checkBingo(false); 
+            updateBingoMessage();
+            saveData(); 
+        }
+
+        // --- Knappkopplingar ---
+        
+        startGameButton.addEventListener('click', () => {
+             // Standard startknapp, används för Nytt Spel om ingen sparad data finns
+             startGame(false);
+        });
+        
+        continueGameButton.addEventListener('click', () => {
+             // Används för Fortsätt Spela (loadSaved=true)
+             startGame(true);
+        });
+        
+        // --- Inlämningslogik (Gmail) och resten av funktionerna är oförändrade ---
+
+        submitBingoLink.addEventListener('click', (event) => {
+            event.preventDefault(); 
+            
+            const isConfirmed = confirm("Är du säker på att du vill skicka in din julbricka? Detta kan inte ångras.");
+            
+            if (isConfirmed) {
+                localStorage.removeItem(STORAGE_KEY);
+                
+                const teamName = teamNameInput.value.trim();
+                let participantsList = [];
+                for (let i = 1; i <= 3; i++) {
+                    const fn = document.getElementById(`p${i}-fn`).value.trim();
+                    const en = document.getElementById(`p${i}-en`).value.trim();
+                    if (fn || en) {
+                        participantsList.push((fn + ' ' + en).trim());
+                    }
+                }
+                const participants = participantsList.join(', ') || 'Inga deltagare registrerade';
+                const currentScore = calculateTotalScore();
+
+                let bingoData = "--- BINGOBRICKA UTFALL ---%0A";
+                bingoData += "Lagnamn: " + teamName + "%0A";
+                bingoData += "Deltagare: " + participants + "%0A";
+                bingoData += "TOTAL POÄNG: " + currentScore + "%0A%0A";
+
+                let markedCellsList = [];
+                let gridDisplay = "";
+                
+                const bingoCells = cells.filter(c => !c.classList.contains('points-indicator'));
+
+                for (let r = 0; r < GRID_SIZE; r++) {
+                    let rowString = "";
+                    for (let c = 0; c < GRID_SIZE; c++) {
+                        const index = r * GRID_SIZE + c;
+                        const cell = bingoCells[index];
+                        const content = cell.textContent;
+                        
+                        if (cell.classList.contains('marked')) {
+                            rowString += `[X ${content}] `;
+                            markedCellsList.push(content);
+                        } else {
+                            rowString += `[_ ${content}] `;
+                        }
+                    }
+                    rowString += `(Radpoäng: ${ROW_POINTS[r]}p)`;
+                    gridDisplay += rowString + "%0A";
+                }
+                
+                const bingoStatus = cells.some(cell => cell.classList.contains('row-bingo')) ? "JA (Hela rad(er) markerade)" : "NEJ";
+                
+                bingoData += "Markerade Rutor (visuell):%0A" + gridDisplay + "%0A";
+                bingoData += "Markerade Rutor (lista): " + (markedCellsList.join(', ') || 'Inga rutor markerade') + "%0A";
+                bingoData += "Har Laget Full Rad (Bingo): " + bingoStatus + "%0A";
+
+                const subject = encodeURIComponent(`Julbingo Inlämning: ${teamName} (${currentScore}p)`);
+                
+                let body = encodeURIComponent(`
+Här är vårt inskick av Julbingobrickan.
+
+${decodeURIComponent(bingoData)}
+
+Vänliga hälsningar,
+Ditt Julbingo-lag
+                `.trim());
+                
+                const mainRecipient = "philip.rydgren@randstad.se";
+                const ccRecipient = "therese.abrahamsson@randstad.se";
+                
+                finalGmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${mainRecipient}&cc=${ccRecipient}&su=${subject}&body=${body}`;
+                
+                window.open(finalGmailLink, '_blank');
+                
+                modalGmailLink.href = finalGmailLink;
+                setTimeout(() => {
+                    godJulModal.style.display = "block";
+                }, 500);
+
+                 cells.forEach(cell => cell.removeEventListener('click', toggleMarked));
+                
+                setTimeout(() => {
+                    window.location.reload();
+                }, 4000);
+            }
+        });
+
+        window.onclick = function(event) {
+            if (event.target == godJulModal) {
+                godJulModal.style.display = "none";
+            }
+        }
+        
+        function calculateTotalScore() {
+            let totalScore = 0;
+            const bingoCells = cells.filter(c => !c.classList.contains('points-indicator'));
+
+            for (let r = 0; r < GRID_SIZE; r++) {
+                const firstCellInRow = bingoCells[r * GRID_SIZE];
+                
+                if (firstCellInRow && firstCellInRow.classList.contains('row-bingo')) {
+                    totalScore += ROW_POINTS[r];
+                }
+            }
+            totalScoreDisplay.textContent = totalScore;
+            return totalScore;
+        }
+
+        function createGrid() {
+            let number = 1;
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.textContent = number; 
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+                    cell.addEventListener('click', toggleMarked);
+                    grid.appendChild(cell);
+                    cells.push(cell); 
+                    number++;
+                }
+                
+                const pointsCell = document.createElement('div');
+                pointsCell.classList.add('cell', 'points-indicator');
+                pointsCell.textContent = ROW_POINTS[r] + 'p';
+                pointsCell.dataset.row = r;
+                pointsCell.dataset.col = GRID_SIZE; 
+                grid.appendChild(pointsCell);
+                cells.push(pointsCell); 
+            }
+        }
+
+        function toggleMarked(event) {
+            const cell = event.target;
+            if (cell.classList.contains('points-indicator')) return; 
+            
+            cell.classList.toggle('marked');
+            checkBingo();
+            
+            updateBingoMessage();
+            saveData(); 
+        }
+
+        function checkBingo(updateMessage = true) {
+            let isRowBingo = false;
+            const bingoCells = cells.filter(c => !c.classList.contains('points-indicator'));
+            const pointIndicators = cells.filter(c => c.classList.contains('points-indicator'));
+
+            for (let r = 0; r < GRID_SIZE; r++) {
+                let rowCount = 0;
+                let rowCells = [];
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    const index = r * GRID_SIZE + c;
+                    const cell = bingoCells[index];
+                    rowCells.push(cell);
+                    if (cell.classList.contains('marked')) {
+                        rowCount++;
+                    }
+                }
+
+                const rowIndicator = pointIndicators[r];
+
+                if (rowCount === GRID_SIZE) {
+                    isRowBingo = true;
+                    rowCells.forEach(cell => cell.classList.add('row-bingo'));
+                    if (rowIndicator) rowIndicator.classList.add('row-bingo');
+                } else {
+                    rowCells.forEach(cell => cell.classList.remove('row-bingo'));
+                    if (rowIndicator) rowIndicator.classList.remove('row-bingo');
+                }
+            }
+            
+            calculateTotalScore();
+
+            if (updateMessage) {
+                 updateBingoMessage(isRowBingo);
+            }
+        }
+
+        function updateBingoMessage() {
+             const anyRowBingo = cells.some(cell => cell.classList.contains('row-bingo'));
+             if (anyRowBingo) {
+                message.textContent = `BINGO! 🎉 Lag ${displayTeamName.textContent} har fått bingo i minst en rad!`;
+             } else {
+                message.textContent = "Klicka på rutorna när du får bingo!";
+             }
+        }
+
+        // --- Initiering vid sidladdning ---
+        createGrid();
+        
+        if (localStorage.getItem(STORAGE_KEY)) {
+             if (loadData() && teamNameInput.value.trim() !== "") {
+                 savedDataMessage.classList.remove('hidden');
+                 continueGameButton.classList.remove('hidden');
+                 
+                 // KORRIGERING: Byt ut "Starta Spelet" mot "Börja Nytt Spel"
+                 startGameButton.textContent = "Börja Nytt Spel (Raderar sparad data)";
+                 
+                 // VIKTIG KORRIGERING: Koppla om knappen till den korrekta rensningslogiken
+                 // Vi använder en funktion som rensar data och laddar om sidan.
+                 const newStartHandler = () => {
+                     if (confirm("Är du säker på att du vill radera sparad data och starta ett nytt spel?")) {
+                          localStorage.removeItem(STORAGE_KEY);
+                          window.location.reload(); 
+                     }
+                 };
+                 // Ta bort den gamla eventlyssnaren och lägg till den nya
+                 startGameButton.removeEventListener('click', () => startGame(false));
+                 startGameButton.addEventListener('click', newStartHandler);
+             }
+        }
+    </script>
+
+</body>
+</html>
